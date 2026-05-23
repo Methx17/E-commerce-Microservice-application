@@ -9,13 +9,14 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/sujithchandran1/Boutique_App.git'
+                git branch: 'master', url: 'https://github.com/Methx17/E-commerce-Microservice-application.git'
             }
         }
 
         stage('Configure & Build') {
             steps {
-                withCredentials([aws(credentialsId: 'aws-cred')]) {
+                withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-cred', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) 
+                {
                     sh """
                     # Setup Kubeconfig
                     aws eks update-kubeconfig --region ${AWS_REG} --name demo-cluster
@@ -31,7 +32,8 @@ pipeline {
         stage('Deploy to EKS') {
             steps {
                 // IMPORTANT: kubectl needs the AWS keys to authenticate with the EKS cluster
-                withCredentials([aws(credentialsId: 'aws-cred')]) {
+                 withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-cred', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) 
+                {
                     sh "kubectl apply -f Microservices/kubernetes-manifests"
                 }
             }
@@ -39,7 +41,8 @@ pipeline {
 
         stage('Verify') {
             steps {
-                withCredentials([aws(credentialsId: 'aws-cred')]) {
+                 withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-cred', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) 
+                {
                     sh "kubectl get pods"
                 }
             }
